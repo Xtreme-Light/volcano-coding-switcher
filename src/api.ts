@@ -11,12 +11,25 @@ declare global {
           handler: (e: { payload: unknown }) => void
         ) => Promise<() => void>;
       };
+      shell?: {
+        open: (url: string, openWith?: string) => Promise<void>;
+      };
     };
   }
 }
 
 const tauri = window.__TAURI__;
 export const isTauri = !!tauri?.core?.invoke;
+
+/// 用系统默认浏览器打开外链（依赖 tauri-plugin-shell）。
+export async function openUrl(url: string): Promise<void> {
+  if (tauri?.shell?.open) {
+    await tauri.shell.open(url);
+    return;
+  }
+  // 兜底：非 Tauri 环境（如纯浏览器调试）用 window.open
+  window.open(url, "_blank", "noopener,noreferrer");
+}
 
 export async function invoke<T = unknown>(
   cmd: string,

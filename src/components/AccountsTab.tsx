@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArkAccount, api } from "../api";
+import { ArkAccount, api, openUrl } from "../api";
 
 interface Props {
   onLog: (msg: string) => void;
@@ -98,6 +98,15 @@ export default function AccountsTab({ onLog }: Props) {
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs text-muted">
           每个账号对应一组方舟 AccessKey，可在「绑定」页绑给一个或多个 cc-switch 套餐。用量接口（Code Plan / AFP）跟随账号配置。
+          <br />
+          没有 AccessKey？{" "}
+          <button
+            type="button"
+            className="text-primary hover:underline"
+            onClick={() => openUrl("https://console.volcengine.com/iam/keymanage/")}
+          >
+            前往火山引擎控制台创建 →
+          </button>
         </p>
         <button className="btn btn-primary shrink-0 px-2.5 py-1.5 text-xs" onClick={startNew}>
           + 新增
