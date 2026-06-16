@@ -1,0 +1,41 @@
+[package]
+name = "volcano-coding-switcher"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "查看火山方舟 code_plan 限额并在临近上限时通过 cc-switch 自动切换套餐"
+
+[lib]
+name = "volcano_coding_switcher_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-notification = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+anyhow = "1"
+thiserror = "1"
+chrono = { version = "0.4", features = ["serde"] }
+directories = "5"
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+url = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+async-trait = "0.1"
+rusqlite = { version = "0.31", features = ["bundled"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "火山方舟 code_plan 切换器",
+  "version": "0.1.0",
+  "identifier": "com.volcano.coding.switcher",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "火山方舟 code_plan 切换器",
+        "width": 880,
+        "height": 620,
+        "minWidth": 720,
+        "minHeight": 520,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "shortDescription": "火山方舟 code_plan 切换器",
+    "longDescription": "查看火山方舟 code_plan 限额并在临近上限时通过 cc-switch 自动切换套餐",
+    "targets": "all",
+    "icon": [
+      "icons/icon.png"
+    ],
+    "resources": [],
+    "externalBin": [],
+    "copyright": ""
+  },
+  "plugins": {}
+}

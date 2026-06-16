@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", "Helvetica Neue",
+    sans-serif;
+  font-size: 14px;
+}
+
+@layer components {
+  .card {
+    @apply bg-panel border border-border rounded-xl p-5 shadow-lg shadow-black/20;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg border border-border bg-panel2 hover:bg-panel hover:border-primary transition text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply bg-primary border-primary text-white hover:bg-primaryHover hover:border-primaryHover;
+  }
+  .btn-ghost {
+    @apply bg-transparent border-border hover:bg-panel2;
+  }
+  .input {
+    @apply w-full bg-panel2 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:border-primary placeholder:text-muted/60;
+  }
+  .label {
+    @apply block text-xs text-muted mb-1;
+  }
+  .pill {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs border border-border bg-panel2;
+  }
+  .divider {
+    @apply h-px bg-border my-2;
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a313a;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a414b;
+}

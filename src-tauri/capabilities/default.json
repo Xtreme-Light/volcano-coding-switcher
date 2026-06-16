@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "默认权限：允许主窗口使用核心 API、对话框、通知与外链 shell。",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:default",
+    "core:event:default",
+    "core:app:default",
+    "core:tray:default",
+    "core:menu:default",
+    "dialog:default",
+    "notification:default",
+    "shell:allow-open"
+  ]
+}

@@ -1,0 +1,10 @@
+[workspace]
+members = ["src-tauri"]
+exclude = ["scripts/gen-icon"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["volcano-coding-switcher contributors"]
+license = "MIT"

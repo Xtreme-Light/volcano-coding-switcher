@@ -1,0 +1,31 @@
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Tauri
+src-tauri/target/
+src-tauri/WixTools/
+src-tauri/.cargo/
+
+# Node / Vite
+node_modules/
+dist/
+.cache/
+.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 本地配置与密钥（防止泄露 AK/SK）
+*.env
+.env
+.env.local
+config.json
+src-tauri/config.json
