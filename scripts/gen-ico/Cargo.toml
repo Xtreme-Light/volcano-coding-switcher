@@ -1,0 +1,12 @@
+[package]
+name = "gen-ico"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "gen-ico"
+path = "src/main.rs"
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png", "ico"] }

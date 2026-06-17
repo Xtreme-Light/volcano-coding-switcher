@@ -34,7 +34,8 @@
     "longDescription": "查看火山方舟 code_plan 限额并在临近上限时通过 cc-switch 自动切换套餐",
     "targets": "all",
     "icon": [
-      "icons/icon.png"
+      "icons/icon.png",
+      "icons/icon.ico"
     ],
     "resources": [],
     "externalBin": [],

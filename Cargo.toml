@@ -1,6 +1,6 @@
 [workspace]
 members = ["src-tauri"]
-exclude = ["scripts/gen-icon"]
+exclude = ["scripts/gen-icon", "scripts/gen-ico"]
 resolver = "2"
 
 [workspace.package]
