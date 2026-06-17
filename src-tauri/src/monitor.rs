@@ -1,7 +1,7 @@
 //! 后台轮询：定期获取限额，临近阈值时发送系统通知并按需自动切换 cc-switch 套餐。
 
 use crate::ark::{ArkClient, QuotaProvider};
-use crate::cc_switch_db::CcSwitchDb;
+use crate::cc_switch_cli::CcSwitchCli;
 use crate::cc_switch_proc;
 use crate::config::ArkAccount;
 use crate::error::{AppError, AppResult};
@@ -20,7 +20,7 @@ pub fn spawn<R: Runtime>(app: AppHandle<R>, state: AppState) {
         loop {
             let (account, threshold, interval, auto_switch, cc_db_path, restart_cc) = {
                 let cfg = state.config.read().await;
-                let account = match CcSwitchDb::open(&cfg.cc_switch_db_path)
+                let account = match CcSwitchCli::open(&cfg.cc_switch_db_path)
                     .ok()
                     .and_then(|db| db.get_active_claude_provider().ok().flatten())
                 {
@@ -115,7 +115,7 @@ pub fn spawn<R: Runtime>(app: AppHandle<R>, state: AppState) {
 /// 不是当前激活、且"近5小时"使用率最低的那个，切换到它。
 async fn auto_switch_to_lowest(state: &AppState, cc_db_path: &str) -> AppResult<String> {
     let cfg = state.config.read().await.clone();
-    let db = CcSwitchDb::open(cc_db_path)?;
+    let db = CcSwitchCli::open(cc_db_path)?;
     let providers = db.list_claude_providers()?;
     let accounts: std::collections::HashMap<String, ArkAccount> = cfg
         .accounts
@@ -124,7 +124,7 @@ async fn auto_switch_to_lowest(state: &AppState, cc_db_path: &str) -> AppResult<
         .map(|a| (a.id.clone(), a))
         .collect();
     let client = ArkClient::new();
-    let mut candidates: Vec<(crate::cc_switch_db::CcProvider, f64)> = Vec::new();
+    let mut candidates: Vec<(crate::cc_switch_cli::CcProvider, f64)> = Vec::new();
     for p in providers {
         if p.is_current {
             continue;

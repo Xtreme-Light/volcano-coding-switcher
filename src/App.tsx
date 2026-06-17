@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArkAccount, api, listen } from "./api";
+import { ArkAccount, api, listen, openUrl } from "./api";
 import CcSwitchCard from "./components/CcSwitchCard";
 import EventLog from "./components/EventLog";
 import Header from "./components/Header";
@@ -79,27 +79,48 @@ export default function App() {
     <div className="min-h-screen flex flex-col">
       <Header onOpenSettings={() => setSettingsOpen(true)} />
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-6 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <QuotaCard
-            snapshot={snapshot}
-            onRefresh={() => {
-              refresh(selectedAccountId);
-              ccStatus.refresh();
-            }}
-            refreshing={refreshing}
-            error={quotaError}
-            accounts={accounts}
-            selectedAccountId={selectedAccountId}
-            onSelectAccount={handleSelectAccount}
-          />
-          <CcSwitchCard
-            detect={ccStatus.detect}
-            providers={ccStatus.providers}
-            loading={ccStatus.loading}
-            onRefresh={ccStatus.refresh}
-            onLog={log}
-          />
-        </div>
+        {ccStatus.detect && !ccStatus.detect.cli_installed ? (
+          <section className="card border-danger/50 bg-danger/10">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold text-danger">未安装 cc-switch-cli</h2>
+                <p className="text-sm text-muted mt-1">
+                  本工具依赖 cc-switch-cli 管理和切换 Claude Provider；未安装时无法使用。
+                </p>
+              </div>
+              <button
+                className="btn btn-primary shrink-0"
+                onClick={() =>
+                  openUrl(ccStatus.detect?.install_url ?? "https://github.com/SaladDay/cc-switch-cli")
+                }
+              >
+                去 GitHub 安装
+              </button>
+            </div>
+          </section>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <QuotaCard
+              snapshot={snapshot}
+              onRefresh={() => {
+                refresh(selectedAccountId);
+                ccStatus.refresh();
+              }}
+              refreshing={refreshing}
+              error={quotaError}
+              accounts={accounts}
+              selectedAccountId={selectedAccountId}
+              onSelectAccount={handleSelectAccount}
+            />
+            <CcSwitchCard
+              detect={ccStatus.detect}
+              providers={ccStatus.providers}
+              loading={ccStatus.loading}
+              onRefresh={ccStatus.refresh}
+              onLog={log}
+            />
+          </div>
+        )}
         <EventLog lines={logs} />
       </main>
 

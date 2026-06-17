@@ -104,6 +104,9 @@ export interface CcProvider {
 }
 
 export interface DetectResult {
+  cli_installed: boolean;
+  cli_error: string | null;
+  install_url: string;
   installed: boolean;
   path: string;
   claude_provider_count: number;

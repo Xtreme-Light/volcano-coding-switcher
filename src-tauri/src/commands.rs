@@ -1,7 +1,7 @@
 //! 暴露给前端调用的 Tauri 命令。
 
 use crate::ark::{ArkClient, QuotaProvider};
-use crate::cc_switch_db::{CcProvider, CcSwitchDb, DetectResult};
+use crate::cc_switch_cli::{CcProvider, CcSwitchCli, DetectResult};
 use crate::cc_switch_proc;
 use crate::config::{AppConfig, ArkAccount, ArkCredentials};
 use crate::error::{AppError, AppResult};
@@ -135,7 +135,7 @@ pub struct BindingView {
 #[tauri::command]
 pub async fn list_bindings(state: State<'_, AppState>) -> AppResult<Vec<BindingView>> {
     let cfg = state.config.read().await;
-    let db = CcSwitchDb::open(&cfg.cc_switch_db_path)?;
+    let db = CcSwitchCli::open(&cfg.cc_switch_db_path)?;
     let providers = db.list_claude_providers()?;
     let mut out = Vec::with_capacity(providers.len());
     for p in providers {
@@ -227,7 +227,7 @@ pub async fn fetch_quota(state: State<'_, AppState>) -> AppResult<QuotaSnapshot>
     let (db_path, account) = {
         let cfg = state.config.read().await;
         let db_path = cfg.cc_switch_db_path.clone();
-        let account = match CcSwitchDb::open(&db_path)
+        let account = match CcSwitchCli::open(&db_path)
             .ok()
             .and_then(|db| db.get_active_claude_provider().ok().flatten())
         {
@@ -298,7 +298,7 @@ pub struct ProviderQuota {
 pub async fn fetch_all_quotas(state: State<'_, AppState>) -> AppResult<Vec<ProviderQuota>> {
     let (providers, accounts_index, bindings) = {
         let cfg = state.config.read().await;
-        let db = CcSwitchDb::open(&cfg.cc_switch_db_path)?;
+        let db = CcSwitchCli::open(&cfg.cc_switch_db_path)?;
         let providers = db.list_claude_providers()?;
         let accounts: std::collections::HashMap<String, ArkAccount> = cfg
             .accounts
@@ -358,7 +358,7 @@ pub async fn detect_cc_switch(state: State<'_, AppState>) -> AppResult<DetectRes
         let cfg = state.config.read().await;
         cfg.cc_switch_db_path.clone()
     };
-    CcSwitchDb::detect(&path)
+    CcSwitchCli::detect(&path)
 }
 
 #[tauri::command]
@@ -367,7 +367,7 @@ pub async fn list_cc_providers(state: State<'_, AppState>) -> AppResult<Vec<CcPr
         let cfg = state.config.read().await;
         cfg.cc_switch_db_path.clone()
     };
-    let db = CcSwitchDb::open(&path)?;
+    let db = CcSwitchCli::open(&path)?;
     db.list_claude_providers()
 }
 
@@ -377,7 +377,7 @@ pub async fn get_active_cc_provider(state: State<'_, AppState>) -> AppResult<Opt
         let cfg = state.config.read().await;
         cfg.cc_switch_db_path.clone()
     };
-    let db = CcSwitchDb::open(&path)?;
+    let db = CcSwitchCli::open(&path)?;
     db.get_active_claude_provider()
 }
 
@@ -390,7 +390,7 @@ pub async fn switch_plan(state: State<'_, AppState>, plan: String) -> AppResult<
             cfg.restart_cc_switch_after_switch,
         )
     };
-    let db = CcSwitchDb::open(&path)?;
+    let db = CcSwitchCli::open(&path)?;
     let provider = db.activate_claude(&plan)?;
 
     {
@@ -421,7 +421,7 @@ pub async fn list_plans(state: State<'_, AppState>) -> AppResult<Vec<String>> {
         let cfg = state.config.read().await;
         cfg.cc_switch_db_path.clone()
     };
-    match CcSwitchDb::open(&path) {
+    match CcSwitchCli::open(&path) {
         Ok(db) => Ok(db
             .list_claude_providers()
             .unwrap_or_default()

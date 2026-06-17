@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CcProvider, DetectResult, ProviderQuota, api } from "../api";
+import { CcProvider, DetectResult, ProviderQuota, api, openUrl } from "../api";
 
 interface Props {
   detect: DetectResult | null;
@@ -37,31 +37,40 @@ export default function CcSwitchCard({
     );
   }
 
+  if (!detect.cli_installed) {
+    return (
+      <section className="card">
+        <h2 className="text-base font-semibold">cc-switch-cli 检测</h2>
+        <div className="mt-3 bg-danger/10 border border-danger/40 rounded-lg p-3 text-sm">
+          <div className="font-semibold text-danger">未检测到 cc-switch-cli</div>
+          <div className="text-xs text-muted mt-1 leading-relaxed">
+            本工具依赖 cc-switch-cli 管理和切换 Claude Provider；未安装时无法使用。
+            {detect.cli_error ? <div className="mt-1">检测错误：{detect.cli_error}</div> : null}
+          </div>
+          <button
+            className="btn btn-primary mt-3"
+            onClick={() => openUrl(detect.install_url)}
+          >
+            打开 GitHub 安装说明
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   if (!detect.installed) {
     return (
       <section className="card">
         <h2 className="text-base font-semibold">cc-switch 状态</h2>
         <div className="mt-3 bg-warn/10 border border-warn/40 rounded-lg p-3 text-sm">
-          <div className="font-semibold text-warn">未检测到 cc-switch 数据库</div>
+          <div className="font-semibold text-warn">已检测到 CLI，但未检测到 cc-switch 数据库</div>
           <div className="text-xs text-muted mt-1">
             期望路径：<code className="bg-panel2 px-1.5 py-0.5 rounded">{detect.path}</code>
           </div>
           <ol className="list-decimal pl-5 mt-2 space-y-1 text-xs leading-relaxed">
-            <li>
-              前往{" "}
-              <a
-                className="text-primary underline"
-                href="https://github.com/farion1231/cc-switch/releases"
-                target="_blank"
-                rel="noreferrer"
-              >
-                cc-switch Releases
-              </a>{" "}
-              下载安装：Linux .AppImage / .deb，macOS .dmg，Windows .msi
-            </li>
-            <li>启动 cc-switch，添加至少一个 Claude Provider。</li>
+            <li>运行 cc-switch-cli，添加至少一个 Claude Provider。</li>
             <li>回到本工具点击"刷新"即可同步。</li>
-            <li>如安装路径不同，可在右上角"设置 → cc-switch 集成"中指定。</li>
+            <li>如配置路径不同，可在右上角"设置 → cc-switch 集成"中指定。</li>
           </ol>
         </div>
       </section>

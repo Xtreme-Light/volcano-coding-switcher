@@ -12,7 +12,7 @@ src-tauri/.cargo/
 node_modules/
 dist/
 .cache/
-.tsbuildinfo
+*.tsbuildinfo
 
 # IDE
 .vscode/

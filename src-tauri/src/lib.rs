@@ -1,7 +1,7 @@
 //! 库入口：构建 Tauri 应用、注册插件、托盘与命令。
 
 mod ark;
-mod cc_switch_db;
+mod cc_switch_cli;
 mod cc_switch_proc;
 mod commands;
 mod config;

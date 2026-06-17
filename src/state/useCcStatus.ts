@@ -13,7 +13,7 @@ export function useCcStatus() {
       setError(null);
       const d = await api.detectCcSwitch();
       setDetect(d);
-      if (d.installed) {
+      if (d.cli_installed && d.installed) {
         const list = await api.listCcProviders();
         setProviders(list);
       } else {

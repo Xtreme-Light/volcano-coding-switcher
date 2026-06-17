@@ -1,7 +1,7 @@
 //! 系统托盘（Tauri v2 TrayIcon API）。
 
 use crate::ark::{ArkClient, QuotaProvider};
-use crate::cc_switch_db::CcSwitchDb;
+use crate::cc_switch_cli::CcSwitchCli;
 use crate::cc_switch_proc;
 use crate::config::ArkAccount;
 use crate::error::{AppError, AppResult};
@@ -80,7 +80,7 @@ fn trigger_refresh<R: Runtime>(app: AppHandle<R>) {
         // 没有绑定则回退到 accounts[0]，再没有就直接报错。
         let account = {
             let cfg = state.config.read().await;
-            match CcSwitchDb::open(&cfg.cc_switch_db_path)
+            match CcSwitchCli::open(&cfg.cc_switch_db_path)
                 .ok()
                 .and_then(|db| db.get_active_claude_provider().ok().flatten())
             {
@@ -133,7 +133,7 @@ fn trigger_switch_next<R: Runtime>(app: AppHandle<R>) {
         // 且 peak_ratio 最低的那个切换过去。
         let result: AppResult<String> = async {
             let cfg = state.config.read().await.clone();
-            let db = CcSwitchDb::open(&cc_db_path)?;
+            let db = CcSwitchCli::open(&cc_db_path)?;
             let providers = db.list_claude_providers()?;
             let accounts: std::collections::HashMap<String, ArkAccount> = cfg
                 .accounts
@@ -142,7 +142,7 @@ fn trigger_switch_next<R: Runtime>(app: AppHandle<R>) {
                 .map(|a| (a.id.clone(), a))
                 .collect();
             let client = ArkClient::new();
-            let mut candidates: Vec<(crate::cc_switch_db::CcProvider, f64)> = Vec::new();
+            let mut candidates: Vec<(crate::cc_switch_cli::CcProvider, f64)> = Vec::new();
             for p in providers {
                 if p.is_current {
                     continue;
