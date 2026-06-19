@@ -41,13 +41,15 @@
 
 ### 前置依赖
 
-- 已安装 [cc-switch](https://github.com/farion1231/cc-switch/releases) 并添加至少一个 Claude Provider
+- 已安装 [cc-switch-cli](https://github.com/SaladDay/cc-switch-cli) 并添加至少一个 Claude Provider
 - 拥有火山方舟账号并购买了 Code Plan 或 AFP 套餐
 - 获取账号的 AccessKey ID / AccessKey Secret（在[火山引擎控制台](https://console.volcengine.com/iam/keymanage/)创建）
 
 ## 用法
 
-1. **启动本应用**，首次打开会提示未检测到 cc-switch 数据库（如果你还没装 cc-switch）
+1. **启动本应用**，首次打开会检测 cc-switch-cli 是否已安装：
+   - 未安装时会显示阻断提示并提供 GitHub 安装链接
+   - 已安装 CLI 但未初始化数据库时会提示先添加 Provider
 2. **打开设置**（右上角齿轮）：
    - **方舟账号**：新增账号，填入 AK / SK / 区域，勾选是否为 Code Plan
    - **账号 ↔ 套餐 绑定**：把 cc-switch 里的每个套餐绑到对应的方舟账号
@@ -72,16 +74,15 @@
 │         │                                       │            │
 │         ▼                                       ▼            │
 │  ┌──────────────┐                      ┌──────────────┐     │
-│  │ 火山方舟 API  │                      │ cc-switch.db │     │
-│  │ GetCodingPlan │                      │ (SQLite)     │     │
-│  │ Usage         │                      │ + settings   │     │
-│  └──────────────┘                      │   .json      │     │
-│                                        └──────────────┘     │
+│  │ 火山方舟 API  │                      │ cc-switch-cli│     │
+│  │ GetCodingPlan │                      │ provider     │     │
+│  │ Usage         │                      │ switch <id>  │     │
+│  └──────────────┘                      └──────────────┘     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 - **用量查询**：通过火山引擎 Signature V4 签名调用 `GetCodingPlanUsage`（POST）或 `GetAFPUsage`（GET）OpenAPI
-- **cc-switch 集成**：直接读写 cc-switch 的 SQLite 数据库（`~/.cc-switch/cc-switch.db`），切换时更新 `is_current` 字段并同步写入 `~/.claude/settings.json`
+- **cc-switch 集成**：通过官方 CLI `cc-switch --app claude provider switch <id>` 执行切换，不再直接写数据库
 - **进程重启**：切换后可选自动重启 cc-switch GUI（因为它不会热加载数据库变更）
 
 ## 开发
@@ -120,7 +121,7 @@ npm run tauri build
 │   ├── src/
 │   │   ├── ark.rs            # 火山方舟 API 客户端
 │   │   ├── sign.rs           # Signature V4 签名
-│   │   ├── cc_switch_db.rs   # cc-switch SQLite 读写
+│   │   ├── cc_switch_cli.rs  # cc-switch CLI 调用
 │   │   ├── cc_switch_proc.rs # cc-switch 进程重启
 │   │   ├── commands.rs       # Tauri 命令
 │   │   ├── config.rs         # 配置管理
@@ -129,13 +130,15 @@ npm run tauri build
 │   │   └── tray_icon.rs      # 托盘图标生成
 │   ├── Cargo.toml
 │   └── tauri.conf.json
+├── scripts/
+│   └── build-macos-signed.sh # macOS 签名构建脚本
 ├── package.json
 └── tailwind.config.js
 ```
 
 ## 致谢
 
-- [cc-switch](https://github.com/farion1231/cc-switch) — Claude Code Provider 切换器，本工具强依赖它
+- [cc-switch-cli](https://github.com/SaladDay/cc-switch-cli) — Claude Code Provider 切换器 CLI，本工具强依赖它
 - [Tauri](https://tauri.app/) — 跨平台桌面应用框架
 - [火山引擎方舟](https://www.volcengine.com/product/ark) — 大模型推理平台
 
