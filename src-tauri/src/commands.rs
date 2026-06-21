@@ -431,3 +431,94 @@ pub async fn list_plans(state: State<'_, AppState>) -> AppResult<Vec<String>> {
         Err(_) => Ok(Vec::new()),
     }
 }
+
+// ---- 快速配置：一键创建 cc-switch provider + 方舟账号 + 绑定 ----
+
+#[derive(Debug, Deserialize)]
+pub struct SetupArkProviderInput {
+    /// cc-switch provider 显示名。
+    pub provider_name: String,
+    /// 火山方舟 Coding Plan 专属 API Key（用于 Claude Code 鉴权）。
+    pub api_key: String,
+    /// 模型名，例如 glm-5.2。
+    #[serde(default = "default_model")]
+    pub model: String,
+    /// 方舟账号名（用于用量查询）。
+    pub account_name: String,
+    /// AccessKey ID（用于签名查询用量）。
+    pub access_key_id: String,
+    /// AccessKey Secret。
+    pub access_key_secret: String,
+    /// 区域，默认 cn-beijing。
+    #[serde(default = "default_region_str")]
+    pub region: String,
+}
+
+fn default_model() -> String {
+    "glm-5.2".to_string()
+}
+
+fn default_region_str() -> String {
+    "cn-beijing".to_string()
+}
+
+#[derive(Debug, Serialize)]
+pub struct SetupResult {
+    pub provider: CcProvider,
+    pub account_id: String,
+    pub bound: bool,
+}
+
+/// 一键配置：在 cc-switch 中创建火山方舟 Coding Plan provider，
+/// 同时创建方舟账号（AK/SK 用于用量查询）并自动绑定。
+#[tauri::command]
+pub async fn setup_ark_provider(
+    state: State<'_, AppState>,
+    input: SetupArkProviderInput,
+) -> AppResult<SetupResult> {
+    if input.api_key.trim().is_empty() {
+        return Err(AppError::Config("API Key 不能为空".into()));
+    }
+    if input.access_key_id.trim().is_empty() || input.access_key_secret.trim().is_empty() {
+        return Err(AppError::Config("AK / SK 不能为空".into()));
+    }
+
+    let db_path = {
+        let cfg = state.config.read().await;
+        cfg.cc_switch_db_path.clone()
+    };
+    let db = CcSwitchCli::open(&db_path)?;
+    let provider = db.add_claude_provider(
+        &input.provider_name,
+        &input.api_key,
+        &input.model,
+    )?;
+
+    let mut cfg = state.config.write().await;
+    let account_id = format!("acc-{}", chrono::Utc::now().timestamp_millis());
+    let account = ArkAccount {
+        id: account_id.clone(),
+        name: input.account_name,
+        credentials: ArkCredentials {
+            api_key: input.api_key,
+            access_key_id: input.access_key_id,
+            access_key_secret: input.access_key_secret,
+            region: if input.region.trim().is_empty() {
+                "cn-beijing".to_string()
+            } else {
+                input.region
+            },
+        },
+        use_coding_plan: true,
+        api_version: "2024-01-01".to_string(),
+    };
+    cfg.accounts.push(account);
+    cfg.bindings.insert(provider.id.clone(), account_id.clone());
+    cfg.save()?;
+
+    Ok(SetupResult {
+        provider,
+        account_id,
+        bound: true,
+    })
+}

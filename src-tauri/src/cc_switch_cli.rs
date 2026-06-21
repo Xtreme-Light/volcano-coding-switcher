@@ -95,6 +95,57 @@ impl CcSwitchCli {
         .map_err(|e| AppError::CcSwitch(format!("打开 cc-switch.db 失败: {}", e)))
     }
 
+    fn connect_rw(&self) -> AppResult<Connection> {
+        Connection::open_with_flags(
+            &self.path,
+            OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )
+        .map_err(|e| AppError::CcSwitch(format!("打开 cc-switch.db 失败: {}", e)))
+    }
+
+    /// 向 cc-switch 数据库添加一个新的 Claude provider。
+    /// cc-switch-cli 的 `provider add` 是交互式的，因此这里直接写数据库。
+    pub fn add_claude_provider(
+        &self,
+        name: &str,
+        api_key: &str,
+        model: &str,
+    ) -> AppResult<CcProvider> {
+        let settings_config = serde_json::json!({
+            "env": {
+                "ANTHROPIC_AUTH_TOKEN": api_key,
+                "ANTHROPIC_BASE_URL": "https://ark.cn-beijing.volces.com/api/coding",
+                "ANTHROPIC_MODEL": model,
+            }
+        })
+        .to_string();
+
+        let conn = self.connect_rw()?;
+        let max_sort: i64 = conn
+            .query_row(
+                "SELECT COALESCE(MAX(sort_index), -1) FROM providers WHERE app_type = ?1",
+                params![APP_TYPE_CLAUDE],
+                |row| row.get(0),
+            )
+            .map_err(|e| AppError::CcSwitch(format!("查询 sort_index 失败: {}", e)))?;
+        let id = format!("prov-{}", chrono::Utc::now().timestamp_millis());
+        conn.execute(
+            "INSERT INTO providers (id, name, is_current, settings_config, app_type, sort_index) \
+             VALUES (?1, ?2, 0, ?3, ?4, ?5)",
+            params![id, name, &settings_config, APP_TYPE_CLAUDE, max_sort + 1],
+        )
+        .map_err(|e| AppError::CcSwitch(format!("插入 provider 失败: {}", e)))?;
+
+        Ok(CcProvider {
+            id,
+            name: name.to_string(),
+            is_current: false,
+            base_url: "https://ark.cn-beijing.volces.com/api/coding".to_string(),
+            auth_token: api_key.to_string(),
+            settings_config,
+        })
+    }
+
     pub fn list_claude_providers(&self) -> AppResult<Vec<CcProvider>> {
         let conn = self.connect_ro()?;
         let mut stmt = conn

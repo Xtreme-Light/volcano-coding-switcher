@@ -129,6 +129,12 @@ export interface BindResult {
   bound: boolean;
 }
 
+export interface SetupResult {
+  provider: CcProvider;
+  account_id: string;
+  bound: boolean;
+}
+
 /// 单个 cc-switch 套餐的用量查询结果（来自 fetch_all_quotas）。
 export interface ProviderQuota {
   provider_id: string;
@@ -183,4 +189,14 @@ export const api = {
   }) => invoke<BindResult>("bind_provider", { request }),
   unbindProvider: (provider_id: string) =>
     invoke<void>("unbind_provider", { providerId: provider_id }),
+
+  setupArkProvider: (input: {
+    provider_name: string;
+    api_key: string;
+    model?: string;
+    account_name: string;
+    access_key_id: string;
+    access_key_secret: string;
+    region?: string;
+  }) => invoke<SetupResult>("setup_ark_provider", { input }),
 };

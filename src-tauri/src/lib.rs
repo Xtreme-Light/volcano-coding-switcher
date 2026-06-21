@@ -77,6 +77,7 @@ pub fn run() {
             commands::list_bindings,
             commands::bind_provider,
             commands::unbind_provider,
+            commands::setup_ark_provider,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

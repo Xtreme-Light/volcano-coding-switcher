@@ -4,6 +4,7 @@ import AccountsTab from "./AccountsTab";
 import BindingsTab from "./BindingsTab";
 import CcSwitchTab from "./CcSwitchTab";
 import PolicyTab from "./PolicyTab";
+import QuickSetupTab from "./QuickSetupTab";
 
 interface Props {
   open: boolean;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const TABS = [
+  { id: "quicksetup", label: "快速配置" },
   { id: "accounts", label: "方舟账号" },
   { id: "bindings", label: "账号 ↔ 套餐 绑定" },
   { id: "policy", label: "切换策略" },
@@ -31,7 +33,7 @@ export default function SettingsModal({
   onLog,
   onCcStatusRefresh,
 }: Props) {
-  const [tab, setTab] = useState<TabId>("accounts");
+  const [tab, setTab] = useState<TabId>("quicksetup");
 
   useEffect(() => {
     if (!open) return;
@@ -69,6 +71,9 @@ export default function SettingsModal({
           ))}
         </div>
         <div className="flex-1 overflow-auto p-5">
+          {tab === "quicksetup" && (
+            <QuickSetupTab onLog={onLog} onDone={onCcStatusRefresh} />
+          )}
           {tab === "accounts" && (
             <AccountsTab onLog={onLog} />
           )}
